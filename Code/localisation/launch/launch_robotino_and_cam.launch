@@ -1,0 +1,20 @@
+<launch>
+	<node name="vrmagic" pkg="vrmagic_camera" type="vrmagic_camera_node" output="screen">
+		<param name="enable_logging" value="false" />
+
+		<param name="left/port" value="1" />
+		<param name="right/port" value="2" />
+	</node>
+	
+<node name="imgProc" pkg="stereo_image_proc" type="stereo_image_proc" ns="/vrmagic">
+ </node>
+<node name="robotino_node" pkg="robotino_node" type="robotino_node" output="screen">
+		<param name="hostname" value="172.26.1.2" />
+		<param name="max_linear_vel" value="0.2" />
+		<param name="min_linear_vel" value="0.01" />
+		<param name="max_angular_vel" value="1.0" />
+		<param name="min_angular_vel" value="0.01" />
+		<remap from="robotino_joint_states" to="joint_states" />
+		<!--remap from="image_raw" to="image"/-->
+	</node>
+</launch>
