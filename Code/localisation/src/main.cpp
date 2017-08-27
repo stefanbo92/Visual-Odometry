@@ -30,14 +30,14 @@ typedef message_filters::sync_policies::ApproximateTime<
 	vector<uchar> statusLKT;
 	vector<KeyPoint> keypointsLeft, keypointsRight,keypointsLeftNew, goodKeypointsStereoLeft, goodKeypointsStereoRight;
 	Mat descriptorsLeft, descriptorsRight,descriptorsLeftNew,goodDescriptorsStereo;
-    OrbDescriptorExtractor extractor(2000);
+    	OrbDescriptorExtractor extractor(2000);
 	std::vector< DMatch > matches;
 	double avrgTime,tick;
 	std::vector<Point2f>  goodPointsNew, goodPointsTriLeft, goodPointsTriRight;
 	Mat K1,D1,P1,P2,HandEye,RTnew,Rnew,Rtotal,Ttotal,intrinsics,distortion,rvec,tvec;
  	Mat RTtotal=(Mat_<double>(4,4) <<1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
-    Mat tvecSaved=(Mat_<double>(3,1) <<0,0,0);
-    int initFeatures=0;
+    	Mat tvecSaved=(Mat_<double>(3,1) <<0,0,0);
+    	int initFeatures=0;
 	int maxFeat=0;
 	double bestAngle=0;
 
@@ -59,10 +59,10 @@ typedef message_filters::sync_policies::ApproximateTime<
 		//extract ORB descripors
 		extractor.compute(imgLeftOld, keypointsLeft, descriptorsLeft);
 		extractor.compute(imgRightOld, keypointsRight, descriptorsRight);
-        //cout<<"Features detected: "<<keypointsLeft.size()<<endl;
+        	//cout<<"Features detected: "<<keypointsLeft.size()<<endl;
 
 		//Match feature descriptors with brute force matcher and cross check (using hamming distance)
-        BFMatcher matcher=BFMatcher(NORM_HAMMING, true);
+        	BFMatcher matcher=BFMatcher(NORM_HAMMING, true);
 	  	matches.clear();
 	  	matcher.match( descriptorsLeft, descriptorsRight, matches );
 
@@ -75,8 +75,8 @@ typedef message_filters::sync_policies::ApproximateTime<
 				matches.push_back(twoMatches[i][0]);
 				}
 		}
+        	cout<<"Matches Stereo: "<<matches.size()<<endl;
 		*/
-        //cout<<"Matches Stereo: "<<matches.size()<<endl;
 	
 
 		//remove bad stereo matches that are not on the same y-coordinate
@@ -85,9 +85,9 @@ typedef message_filters::sync_policies::ApproximateTime<
 		  { 
 			if (fabs(keypointsLeft[matches[i].queryIdx].pt.y-keypointsRight[matches[i].trainIdx].pt.y)<=2){
 		      		good_matches_stereo.push_back( matches[i]);
-		 		}
+		 	}
 		}
-        //cout<<"Good Matches Stereo: "<<good_matches_stereo.size()<<endl;
+
 
 		//remove matches with a distance higher than a threshol
 		for( int i = 0; i < good_matches_stereo.size(); i++ ){ 
@@ -97,7 +97,7 @@ typedef message_filters::sync_policies::ApproximateTime<
 		}
 
 		good_matches_stereo=veryGood;
-        //cout<<"Very Good Matches: "<<veryGood.size()<<endl;
+        	//cout<<"Very Good Matches: "<<veryGood.size()<<endl;
 
 		for( int i = 0; i < good_matches_stereo.size(); i++ ){  
 		    goodKeypointsStereoLeft.push_back(keypointsLeft[good_matches_stereo[i].queryIdx]);
@@ -113,7 +113,7 @@ typedef message_filters::sync_policies::ApproximateTime<
 
 		//remove outliers with RANSAC
 		Mat statusStereo;
-        findFundamentalMat(goodPointsStereoLeft, goodPointsStereoRight, CV_FM_RANSAC, 3, 0.999, statusStereo);
+        	findFundamentalMat(goodPointsStereoLeft, goodPointsStereoRight, CV_FM_RANSAC, 3, 0.999, statusStereo);
 
 		int stereoInliers=0;
 		vector <KeyPoint> left,right;
@@ -128,7 +128,7 @@ typedef message_filters::sync_policies::ApproximateTime<
 		//cout<<"Stereo Inliers: "<<stereoInliers<<endl;
 		goodKeypointsStereoLeft=left;
 		goodKeypointsStereoRight=right; 
-        goodPointsStereoLeft.clear(); goodPointsStereoRight.clear();
+        	goodPointsStereoLeft.clear(); goodPointsStereoRight.clear();
 		for (int i=0;i<goodKeypointsStereoLeft.size();i++){
 			goodPointsStereoLeft.push_back(goodKeypointsStereoLeft[i].pt);
 			goodPointsStereoRight.push_back(goodKeypointsStereoRight[i].pt);
@@ -151,8 +151,6 @@ typedef message_filters::sync_policies::ApproximateTime<
 		  }
 		  cout<<"matched features: "<<count<<endl;
 	}
-
-
 
 
 
@@ -225,7 +223,7 @@ typedef message_filters::sync_policies::ApproximateTime<
 
 	//VO ALGORITHM:
 	//start clock and load images
-    tick = (double)getTickCount(); 
+    	tick = (double)getTickCount(); 
 	imgLeftc=cv_ptr1->image;
 	imgRightc=cv_ptr2->image;
 
@@ -251,9 +249,9 @@ typedef message_filters::sync_policies::ApproximateTime<
 	
 	//Solve PnP with RANSAC
 	Mat inliers;
-    solvePnPRansac(worldPointsHart, goodPointsNew, K1, D1, rvec, tvec, false,1000,2.0,-1,inliers,CV_P3P);
+    	solvePnPRansac(worldPointsHart, goodPointsNew, K1, D1, rvec, tvec, false,1000,2.0,-1,inliers,CV_P3P);
 	tvec=-tvec;
-    rvec=-rvec;
+    	rvec=-rvec;
 	//print out current motion
 	cout<<"R: "<<rvec*180/3.14<<endl;
 	cout<<"T: "<<tvec<<endl;
@@ -272,17 +270,17 @@ typedef message_filters::sync_policies::ApproximateTime<
 
 	//remove very small or large rotations and translations
 	rvec.at<double>(0)=0;
-    rvec.at<double>(2)=0;
-    tvec.at<double>(1)=0;
+    	rvec.at<double>(2)=0;
+    	tvec.at<double>(1)=0;
 	for (int i=0;i<3;i++){
         if((fabs(rvec.at<double>(i))<0.2/180*3.14)||(fabs(rvec.at<double>(i))>1.5)){
 			rvec.at<double>(i)=0;
 		}
 	}
-    for (int i=0;i<3;i++){
-        if((fabs(tvec.at<double>(i))<1)||(fabs(tvec.at<double>(i))>300)){
+    	for (int i=0;i<3;i++){
+		if((fabs(tvec.at<double>(i))<1)||(fabs(tvec.at<double>(i))>300)){
 			tvec.at<double>(i)=0;
-        }
+		}
 	}
 
 
@@ -292,8 +290,7 @@ typedef message_filters::sync_policies::ApproximateTime<
 	RTnew=(Mat_<double>(4,4) <<Rnew.at<double>(0,0),Rnew.at<double>(0,1),Rnew.at<double>(0,2),tvec.at<double>(0),Rnew.at<double>(1,0),Rnew.at<double>(1,1),Rnew.at<double>(1,2),tvec.at<double>(1),Rnew.at<double>(2,0),Rnew.at<double>(2,1),Rnew.at<double>(2,2),tvec.at<double>(2),0,0,0,1);
 
 	//Calculating the robots pose from the cameras pose (Hand-Eye-Relation)
-    RTnew=HandEye*RTnew*HandEye.inv();
-
+    	RTnew=HandEye*RTnew*HandEye.inv();
 	RTtotal=RTtotal*RTnew;
 
 	//print out total pose
@@ -348,7 +345,7 @@ typedef message_filters::sync_policies::ApproximateTime<
 
 	//Output Images and copy current images to old images
 	imshow( "Input1", imgLeftc );
-    imshow( "Input2", imgRightc );
+    	imshow( "Input2", imgRightc );
 
 	//save the current image frame for the next calculation step
 	imgLeft.copyTo(imgLeftOld);
@@ -371,6 +368,7 @@ typedef message_filters::sync_policies::ApproximateTime<
         initFeatures=0;
         maxFeat=0;
     }
+
 	//turn to the left, searching for most features
     if (initFeatures==0){
         cmd_pos_msg.position.y=2;
@@ -382,6 +380,7 @@ typedef message_filters::sync_policies::ApproximateTime<
             initFeatures=1;
 		}
 	}
+
 	//turn to the right, searching for most features
     if (initFeatures==1){
         cmd_pos_msg.position.y=1;
@@ -395,6 +394,7 @@ typedef message_filters::sync_policies::ApproximateTime<
             waitKey(2000);
         }
     }
+
 	//turn to the direction with the most features
     if (initFeatures==2){
         cmd_pos_msg.position.y=2;
@@ -420,7 +420,7 @@ typedef message_filters::sync_policies::ApproximateTime<
 	}
 */
 
-	//wait 1ms
+    //wait 1ms
     char k=waitKey(1);
     if(k == 'a'){k=waitKey(20000); } 
 
